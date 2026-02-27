@@ -64,7 +64,10 @@ export class DefaultRenderer extends Renderer {
 			});
 		}
 
-		// --- Reinitialize Elementor widgets ---
+		// --- Reinitialize Elementor widgets (single pass) ---
+		// Elementor's addHandler() has no dedup on the frontend (no model-cid),
+		// so each runReadyTrigger call creates a new handler instance.
+		// We run ONE pass here in onEnter so widgets init before the fade-in.
 		if (typeof elementorFrontend !== 'undefined' && elementorFrontend.elementsHandler) {
 			const wrapper = this.wrapper;
 			if (wrapper) {
@@ -100,17 +103,7 @@ export class DefaultRenderer extends Renderer {
 	}
 
 	onEnterCompleted() {
-		// --- Elementor widgets second pass (visibility-dependent) ---
-		if (typeof elementorFrontend !== 'undefined' && elementorFrontend.elementsHandler) {
-			const wrapper = this.wrapper;
-			if (wrapper) {
-				try {
-					wrapper.querySelectorAll('[data-widget_type]').forEach((widget) => {
-						elementorFrontend.elementsHandler.runReadyTrigger(window.jQuery ? jQuery(widget) : widget);
-					});
-				} catch { /* Elementor observer accessing stale elements */ }
-			}
-		}
+		// Widget init handled in onEnter (single pass to avoid duplicate handlers)
 	}
 
 	onLeave() {

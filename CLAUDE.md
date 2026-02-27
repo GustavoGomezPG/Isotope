@@ -108,9 +108,9 @@ footer.php
 2. `FadeTransition.onLeave()` → removes active menu classes → header slides up + content fades out (parallel)
 3. `DefaultRenderer.onLeave()` → cleans up all animations (parallax, levitate, fadeIn, bgTransition, ScrollTriggers, GSAP tweens)
 4. Taxi.js fetches new page → extracts `<div data-taxi-view>` content → swaps DOM
-5. `DefaultRenderer.onEnter()` → syncs body classes → diffs `<head>` elements → re-inits Elementor widgets → handles hash scroll / scroll-to-top → runs lazyload
+5. `DefaultRenderer.onEnter()` → syncs body classes → diffs `<head>` elements → re-inits Elementor widgets (single pass) → handles hash scroll / scroll-to-top → runs lazyload
 6. `FadeTransition.onEnter()` → updates active menu classes → `animator(newContent)` → content fades in + header slides down (parallel)
-7. `DefaultRenderer.onEnterCompleted()` → second pass Elementor widget re-init
+7. `DefaultRenderer.onEnterCompleted()` → reserved for future post-transition hooks
 
 ### Script Re-execution Filter
 
@@ -266,7 +266,9 @@ ViteAssets::enqueue_css('main', 'isotope-theme-main'); // wp_enqueue_style from 
 ### Elementor Integration
 
 - Header/footer: Elementor Theme Builder locations are registered. Fallbacks in `template-parts/dynamic-header.php` and `dynamic-footer.php`.
-- Widget re-init: `DefaultRenderer.onEnter()` and `onEnterCompleted()` call `elementorFrontend.elementsHandler.runReadyTrigger()` on all widgets in the new content. Wrapped in try-catch for stale element safety.
+- Widget re-init: `DefaultRenderer.onEnter()` calls `elementorFrontend.elementsHandler.runReadyTrigger()` **once** per widget in the new content. Wrapped in try-catch for stale element safety.
+- **CRITICAL — single pass only:** Elementor's `addHandler()` has no dedup on the frontend (the `model-cid` check only works in the editor). Each `runReadyTrigger` call creates a brand new handler instance (`onInit` → `initElements` → `bindEvents`). Calling it twice duplicates Lottie SVGs, Swiper instances, event listeners, etc. See `elementor/assets/js/frontend.js:151` for the `addHandler` implementation.
+- Lazy-loaded widget chunks: Pro widgets (hotspot, lottie, carousel, nav-menu, etc.) use webpack dynamic imports. The chunks are loaded on first encounter and cached in memory. They survive Taxi navigations because `<script>` tags in `<head>` are never removed.
 - Head diffing: `DefaultRenderer.onEnter()` diffs `<head>` elements — adds new meta/link tags, removes stale ones, but **never removes scripts, styles, or stylesheets** to prevent breaking Vite/Elementor assets.
 - Videos: `.elementor-video` elements are auto-played after transitions.
 - Hide title: The `isotope_page_title` filter respects Elementor's "Hide Title" document setting.
@@ -356,7 +358,7 @@ if (page === 'contact') {
 
 4. **jQuery is loaded.** WordPress enqueues jQuery. The animation system and Taxi transitions use `jQuery()` for DOM queries. It's available globally.
 
-5. **Elementor re-init uses try-catch.** After Taxi DOM swap, Elementor's MutationObserver can access stale elements. The try-catch in `DefaultRenderer` prevents crashes.
+5. **Elementor re-init uses try-catch and must be single-pass.** After Taxi DOM swap, Elementor's MutationObserver can access stale elements. The try-catch in `DefaultRenderer` prevents crashes. Widget re-init MUST happen in ONE pass (in `onEnter`). A second pass in `onEnterCompleted` would create duplicate handler instances for every widget because `addHandler()` has no frontend dedup.
 
 6. **All ScrollTriggers killed on leave.** `DefaultRenderer.onLeave()` kills ALL ScrollTriggers and GSAP tweens on the outgoing content. This prevents callbacks from accessing removed DOM nodes.
 

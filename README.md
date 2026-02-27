@@ -69,6 +69,7 @@ First Visit:
 Subsequent Navigation (SPA):
   Click link → header slides up + content fades out (parallel) →
   Taxi.js fetches new page → old DOM swapped →
+  Elementor widgets re-initialized (single pass) →
   content fades in + header slides back down (parallel) → page ready
 ```
 
@@ -389,9 +390,19 @@ Vite automatically splits these into separate chunks for optimal loading:
 ## Elementor Integration
 
 - **Header/Footer:** Use Elementor's Theme Builder to create custom headers and footers. The theme registers all core Elementor locations. If no Elementor template exists, the fallback `dynamic-header.php` / `dynamic-footer.php` renders.
-- **Widgets:** Elementor widgets are automatically re-initialized after Taxi.js page transitions (two passes — once on enter, once after animation completes).
+- **Widgets:** Elementor widgets are automatically re-initialized after Taxi.js page transitions via a single `runReadyTrigger` pass in `DefaultRenderer.onEnter()`. This covers all widget types — including Pro widgets with lazy-loaded JS (hotspot, lottie, carousel, nav-menu, gallery, slides, etc.).
 - **Videos:** Elementor video widgets with autoplay are automatically played after transitions.
 - **Hide Title:** The Elementor "Hide Title" setting is respected via the `isotope_page_title` filter.
+
+### How Elementor Widget JS Survives Page Transitions
+
+Elementor Pro widgets use lazy-loaded webpack chunks (e.g., `hotspot.*.bundle.js`). On initial page load, `elements-handlers.js` registers hook callbacks for each widget type via `attachHandler()`. These hooks persist in memory across Taxi.js navigations because:
+
+1. The `elements-handlers.js` script stays loaded (never removed from `<head>`)
+2. Webpack chunks, once fetched, stay in the module cache
+3. `runReadyTrigger()` fires the hooks, which instantiate handler classes
+
+**Important:** `runReadyTrigger` must be called exactly **once** per widget after a DOM swap. Elementor's `addHandler()` has no deduplication on the frontend — each call creates a new handler instance with fresh event bindings. Calling it twice would duplicate Lottie animations, Swiper instances, tooltip listeners, etc.
 
 ## Gotchas
 

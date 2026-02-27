@@ -1,6 +1,6 @@
 # Isotope
 
-A modern WordPress starter theme built on [Hello Elementor](https://github.com/elementor/hello-theme) with SPA-style page transitions, smooth scroll, and a production-ready animation system — all powered by Vite.
+A modern WordPress starter theme with SPA-style page transitions, smooth scroll, and a production-ready animation system — all powered by Vite. Elementor compatible but fully standalone.
 
 ## Stack
 
@@ -18,8 +18,7 @@ A modern WordPress starter theme built on [Hello Elementor](https://github.com/e
 
 - WordPress 6.0+
 - PHP 8.0+
-- [Hello Elementor](https://wordpress.org/themes/hello-elementor/) parent theme installed
-- [Elementor](https://elementor.com/) (free or Pro) for header/footer theme builder
+- [Elementor](https://elementor.com/) (free or Pro) recommended for header/footer theme builder (optional — fallback templates included)
 - Node.js 18+ and npm
 
 ## Quick Start
@@ -41,7 +40,6 @@ mkcert -key-file .cert/key.pem -cert-file .cert/cert.pem localhost
 npm run dev
 
 # 5. Activate the theme in WP Admin → Appearance → Themes
-#    (Hello Elementor must be installed as the parent theme)
 ```
 
 ### Production Build
@@ -265,7 +263,7 @@ Use `theme_url` for referencing theme assets from JavaScript (e.g., Lottie JSON 
 
 ```
 Isotope/
-├── style.css                          # Theme metadata (child of Hello Elementor)
+├── style.css                          # Theme metadata (standalone theme)
 ├── functions.php                      # Theme setup, loads includes
 ├── header.php                         # <head>, preloader, Elementor header, opens <div data-taxi>
 ├── footer.php                         # Closes </div data-taxi>, Elementor footer
@@ -397,7 +395,7 @@ Vite automatically splits these into separate chunks for optimal loading:
 - **Header/Footer:** Use Elementor's Theme Builder to create custom headers and footers. The theme registers all core Elementor locations. If no Elementor template exists, the fallback `dynamic-header.php` / `dynamic-footer.php` renders.
 - **Widgets:** Elementor widgets are automatically re-initialized after Taxi.js page transitions (two passes — once on enter, once after animation completes).
 - **Videos:** Elementor video widgets with autoplay are automatically played after transitions.
-- **Hide Title:** The Elementor "Hide Title" setting is respected via the `hello_elementor_page_title` filter.
+- **Hide Title:** The Elementor "Hide Title" setting is respected via the `isotope_page_title` filter.
 
 ## Gotchas
 

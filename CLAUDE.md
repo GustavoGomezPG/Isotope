@@ -2,7 +2,7 @@
 
 ## Overview
 
-WordPress child theme of Hello Elementor. Provides a modern dev stack (Vite 7 + Tailwind CSS 4 + Taxi.js + GSAP + Lenis + Lottie + SplitType) with SPA-style page transitions out of the box. No business logic — this is a blank starter theme.
+Standalone WordPress starter theme with Elementor compatibility. Provides a modern dev stack (Vite 7 + Tailwind CSS 4 + Taxi.js + GSAP + Lenis + Lottie + SplitType) with SPA-style page transitions out of the box. No business logic — this is a blank starter theme. Works with or without Elementor installed.
 
 **Stack:** WordPress 6.0+ | PHP 8.0+ | Vite 7 | Tailwind CSS 4 | Taxi.js | GSAP | Lenis | Lottie | SplitType | Elementor
 
@@ -12,7 +12,7 @@ WordPress child theme of Hello Elementor. Provides a modern dev stack (Vite 7 + 
 
 ```
 Isotope/
-├── style.css                          # Theme metadata (Template: hello-elementor)
+├── style.css                          # Theme metadata (standalone theme)
 ├── functions.php                      # Theme setup, loads includes
 ├── header.php                         # <head>, preloader div, Elementor header, <div data-taxi>
 ├── footer.php                         # </div data-taxi>, Elementor footer, wp_footer
@@ -38,8 +38,8 @@ Isotope/
 └── template-parts/
     ├── taxi-container-start.php       # <div data-taxi-view id="site-main-wrapper" data-page="...">
     ├── taxi-container-end.php         # </div>
-    ├── dynamic-header.php             # Hello Elementor fallback header
-    ├── dynamic-footer.php             # Hello Elementor fallback footer
+    ├── dynamic-header.php             # Fallback header (logo, title, nav)
+    ├── dynamic-footer.php             # Fallback footer (nav, copyright)
     ├── single.php                     # Single post/page
     ├── archive.php                    # Archive/blog listing
     ├── search.php                     # Search results
@@ -66,7 +66,7 @@ functions.php
   └─ requires ViteAssets.php (must be first)
   └─ checks ViteAssets::is_production()
       ├─ true  → requires production-scripts.php (IsotopeProductionScripts)
-      │           hooks into elementor/frontend/after_register_scripts
+      │           hooks into elementor/frontend/after_register_scripts (or wp_enqueue_scripts if no Elementor)
       │           enqueues JS from manifest with type="module" + modulepreload
       │           enqueues CSS from manifest
       └─ false → requires script-imports.php (IsotopeDevScripts)
@@ -269,7 +269,7 @@ ViteAssets::enqueue_css('main', 'isotope-theme-main'); // wp_enqueue_style from 
 - Widget re-init: `DefaultRenderer.onEnter()` and `onEnterCompleted()` call `elementorFrontend.elementsHandler.runReadyTrigger()` on all widgets in the new content. Wrapped in try-catch for stale element safety.
 - Head diffing: `DefaultRenderer.onEnter()` diffs `<head>` elements — adds new meta/link tags, removes stale ones, but **never removes scripts, styles, or stylesheets** to prevent breaking Vite/Elementor assets.
 - Videos: `.elementor-video` elements are auto-played after transitions.
-- Hide title: The `hello_elementor_page_title` filter respects Elementor's "Hide Title" document setting.
+- Hide title: The `isotope_page_title` filter respects Elementor's "Hide Title" document setting.
 
 ### Programmatic Navigation
 

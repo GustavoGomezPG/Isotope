@@ -7,14 +7,21 @@
  */
 
 if (!defined('ABSPATH')) {
-  exit; // Exit if accessed directly.
+  exit;
 }
 
 class IsotopeProductionScripts
 {
   function __construct()
   {
-    add_action('elementor/frontend/after_register_scripts', array($this, 'register_theme_scripts'));
+    // Register scripts after Elementor if available, otherwise use wp_enqueue_scripts directly
+    if (did_action('elementor/loaded')) {
+      add_action('elementor/frontend/after_register_scripts', array($this, 'register_theme_scripts'));
+    } else {
+      add_action('wp_enqueue_scripts', array($this, 'enqueue_main_js'));
+      add_action('wp_enqueue_scripts', array($this, 'enqueue_main_css'));
+    }
+
     add_action('admin_enqueue_scripts', array($this, 'enqueue_wp_i18n'));
     add_filter('script_loader_tag', array($this, 'add_module_type_attribute'), 10, 3);
   }
@@ -33,13 +40,11 @@ class IsotopeProductionScripts
   public function add_module_type_attribute($tag, $handle, $src)
   {
     if ($handle === 'isotope-theme-main') {
-      // Get modulepreload links for chunks
       $modulepreload_links = '';
       foreach (ViteAssets::get_chunk_urls('main') as $chunk_url) {
         $modulepreload_links .= '<link rel="modulepreload" href="' . esc_url($chunk_url) . '">' . "\n";
       }
 
-      // Return modulepreload links + module script tag
       return $modulepreload_links . '<script type="module" src="' . esc_url($src) . '"></script>';
     }
 
@@ -63,7 +68,6 @@ class IsotopeProductionScripts
         true
       );
     } else {
-      // Fallback to direct path if manifest not available
       wp_enqueue_script(
         'isotope-theme-main',
         ViteAssets::get_dist_uri() . '/js/main.min.js',
@@ -83,7 +87,7 @@ class IsotopeProductionScripts
   }
 
   /**
-   * Register all theme scripts
+   * Register all theme scripts (called when Elementor is active)
    */
   public function register_theme_scripts()
   {

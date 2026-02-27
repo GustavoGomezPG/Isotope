@@ -1,0 +1,140 @@
+/* Tailwind CSS - No config needed! */
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* Source directives - Tell Tailwind where to scan for classes */
+/* Paths are relative to this CSS file (assets/css/main.css) */
+@source "../../**/*.php";
+@source "../js/**/*.js";
+
+/* Custom Theme Styles */
+
+@theme {
+  --color-primary: #3b82f6;
+  --color-secondary: #10b981;
+  --color-accent: #f59e0b;
+  --breakpoint-xs: 425px;
+  --breakpoint-nav: 1024px;
+  --breakpoint-2xl: 1440px;
+  --breakpoint-3xl: 1536px;
+  --spacing-container: 1440px;
+  --z-auto: auto;
+  --z-0: 0;
+  --z-1: 1;
+  --z-2: 2;
+  --z-3: 3;
+  --z-4: 4;
+  --z-5: 5;
+  --z-6: 6;
+  --z-7: 7;
+  --z-8: 8;
+  --z-9: 9;
+  --z-10: 10;
+  --z-20: 20;
+  --z-30: 30;
+  --z-40: 40;
+  --z-50: 50;
+}
+
+@utility container {
+  padding-left: 10px;
+  padding-right: 10px;
+  margin: 0 auto;
+
+  @variant sm {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  @variant lg {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+@utility inner-container {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  padding-left: 24px;
+  padding-right: 24px;
+
+  @variant xl {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+}
+
+/* End Tailwind config
+------------------------------------------------------------------------------------------------------------
+  Start Global CSS
+------------------------------------------------------------------------------------------------------------
+ */
+
+@layer base {
+  body {
+    min-height: 100vh;
+    justify-content: space-between;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #wpfooter {
+    display: none;
+  }
+
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+
+  .lenis.lenis-stopped {
+    overflow: clip;
+  }
+
+  .lenis.lenis-smooth iframe {
+    pointer-events: none;
+  }
+
+  /* Preloader styles */
+
+  #page-preloader {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    transition: opacity 0.5s ease;
+    opacity: 1;
+    z-index: 9999;
+  }
+
+  #page-preloader svg {
+    transition: opacity 1s ease;
+    max-width: 250px;
+  }
+
+  /* main default style — hidden until intro animation */
+  #site-main-wrapper {
+    opacity: 0;
+  }
+
+  /* Header hidden until intro animation slides it in */
+  [data-elementor-type="header"] {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+
+  .skip-link {
+    opacity: 0;
+  }
+}
+
+/* End Global CSS */

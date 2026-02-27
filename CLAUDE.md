@@ -19,7 +19,7 @@ Isotope/
 ├── index.php                          # Main template router with Taxi container
 ├── screenshot.png                     # 1200x900 placeholder
 ├── package.json                       # npm deps (no React, no Atropos, no Basecoat, no Lucide)
-├── vite.config.js                     # Single entry point (assets/js/main.js), HTTPS dev, code splitting
+├── vite.config.js                     # Single entry point (assets/js/main.js), code splitting
 ├── .gitignore
 ├── includes/
 │   ├── ViteAssets.php                 # Static class: dev/prod detection, manifest, asset URLs
@@ -50,7 +50,7 @@ Isotope/
 
 ## Build System
 
-- **Dev:** `npm run dev` → Vite dev server at `https://localhost:3000` (requires `.cert/key.pem` + `.cert/cert.pem` from mkcert)
+- **Dev:** `npm run dev` → Vite dev server at `http://localhost:3000`
 - **Prod:** `npm run build` → `dist/` folder with `.vite/manifest.json`
 - **Detection:** `ViteAssets::is_production()` checks if `dist/` exists. No env vars needed.
 - **Code splitting:** GSAP, Lottie, Taxi, Lenis, SplitType each get their own chunk. One entry point: `assets/js/main.js`.
@@ -354,16 +354,14 @@ if (page === 'contact') {
 
 3. **Preloader plays once per session.** Uses `sessionStorage.loaderAnimationPlayed`. Clear storage or new tab to re-test.
 
-4. **HTTPS dev server.** Vite serves at `https://localhost:3000`. Needs mkcert certs in `.cert/`. Without certs, falls back to HTTP which may cause mixed-content issues.
+4. **jQuery is loaded.** WordPress enqueues jQuery. The animation system and Taxi transitions use `jQuery()` for DOM queries. It's available globally.
 
-5. **jQuery is loaded.** WordPress enqueues jQuery. The animation system and Taxi transitions use `jQuery()` for DOM queries. It's available globally.
+5. **Elementor re-init uses try-catch.** After Taxi DOM swap, Elementor's MutationObserver can access stale elements. The try-catch in `DefaultRenderer` prevents crashes.
 
-6. **Elementor re-init uses try-catch.** After Taxi DOM swap, Elementor's MutationObserver can access stale elements. The try-catch in `DefaultRenderer` prevents crashes.
+6. **All ScrollTriggers killed on leave.** `DefaultRenderer.onLeave()` kills ALL ScrollTriggers and GSAP tweens on the outgoing content. This prevents callbacks from accessing removed DOM nodes.
 
-7. **All ScrollTriggers killed on leave.** `DefaultRenderer.onLeave()` kills ALL ScrollTriggers and GSAP tweens on the outgoing content. This prevents callbacks from accessing removed DOM nodes.
+7. **Active menu classes on `<li>`.** `FadeTransition.onEnter()` adds `current-menu-item` to both the `<a>` AND its parent `<li>`. WordPress CSS targets `li.current-menu-item > a`.
 
-8. **Active menu classes on `<li>`.** `FadeTransition.onEnter()` adds `current-menu-item` to both the `<a>` AND its parent `<li>`. WordPress CSS targets `li.current-menu-item > a`.
+8. **Production handle is `isotope-theme-main`.** The `script_loader_tag` filter checks for this handle to add `type="module"`. If you change the handle, update the filter.
 
-9. **Production handle is `isotope-theme-main`.** The `script_loader_tag` filter checks for this handle to add `type="module"`. If you change the handle, update the filter.
-
-10. **Version uses `wp_get_theme()->get('Version')`.** Not a constant. Change the version in `style.css` to cache-bust.
+9. **Version uses `wp_get_theme()->get('Version')`.** Not a constant. Change the version in `style.css` to cache-bust.

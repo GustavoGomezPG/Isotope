@@ -18,7 +18,7 @@ class ViteAssets
   /**
    * Vite dev server URL
    */
-  private const DEV_SERVER_URL = 'https://localhost:3000';
+  private const DEV_SERVER_URL = 'http://localhost:3000';
 
   /**
    * Manifest file path relative to dist folder

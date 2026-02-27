@@ -1,27 +1,9 @@
 import tailwindcss from "@tailwindcss/vite";
-import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { defineConfig } from "vite";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// Load HTTPS certs for dev server
-const getHttpsConfig = () => {
-	const keyPath = path.resolve(__dirname, ".cert/key.pem");
-	const certPath = path.resolve(__dirname, ".cert/cert.pem");
-
-	if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
-		return {
-			key: fs.readFileSync(keyPath),
-			cert: fs.readFileSync(certPath),
-		};
-	}
-
-	return false;
-};
-
-const httpsConfig = getHttpsConfig();
 
 export default defineConfig({
 	plugins: [tailwindcss()],
@@ -101,9 +83,6 @@ export default defineConfig({
 		port: 3000,
 		strictPort: true,
 
-		// HTTPS with mkcert locally-trusted certificates
-		https: httpsConfig,
-
 		// Automatically open browser
 		open: false,
 
@@ -114,7 +93,6 @@ export default defineConfig({
 		hmr: {
 			host: "localhost",
 			port: 3000,
-			protocol: httpsConfig ? "wss" : "ws",
 		},
 
 		// Proxy settings if needed

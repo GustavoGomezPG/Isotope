@@ -69,8 +69,8 @@ export class DefaultRenderer extends Renderer {
 			const wrapper = this.wrapper;
 			if (wrapper) {
 				try {
-					jQuery(wrapper).find('[data-widget_type]').each(function () {
-						elementorFrontend.elementsHandler.runReadyTrigger(jQuery(this));
+					wrapper.querySelectorAll('[data-widget_type]').forEach((widget) => {
+						elementorFrontend.elementsHandler.runReadyTrigger(window.jQuery ? jQuery(widget) : widget);
 					});
 				} catch { /* Elementor observer accessing stale elements */ }
 			}
@@ -105,8 +105,8 @@ export class DefaultRenderer extends Renderer {
 			const wrapper = this.wrapper;
 			if (wrapper) {
 				try {
-					jQuery(wrapper).find('[data-widget_type]').each(function () {
-						elementorFrontend.elementsHandler.runReadyTrigger(jQuery(this));
+					wrapper.querySelectorAll('[data-widget_type]').forEach((widget) => {
+						elementorFrontend.elementsHandler.runReadyTrigger(window.jQuery ? jQuery(widget) : widget);
 					});
 				} catch { /* Elementor observer accessing stale elements */ }
 			}
@@ -137,11 +137,11 @@ export class DefaultRenderer extends Renderer {
 export class FadeTransition extends Transition {
 	onLeave({ from, trigger, done }) {
 		// Remove active menu classes
-		jQuery('li').each(function () {
-			jQuery(this).removeClass('elementor-item-active current-menu-item current_page_item');
+		document.querySelectorAll('li').forEach((li) => {
+			li.classList.remove('elementor-item-active', 'current-menu-item', 'current_page_item');
 		});
-		jQuery('li > a').each(function () {
-			jQuery(this).removeClass('elementor-item-active current-menu-item current_page_item');
+		document.querySelectorAll('li > a').forEach((a) => {
+			a.classList.remove('elementor-item-active', 'current-menu-item', 'current_page_item');
 		});
 
 		// Capture hash from trigger link for the renderer
@@ -197,8 +197,8 @@ export class FadeTransition extends Transition {
 		}
 
 		// Add active menu classes for current page
-		jQuery('a').each(function () {
-			const href = jQuery(this).attr('href');
+		document.querySelectorAll('a').forEach((a) => {
+			const href = a.getAttribute('href');
 			if (!href) return;
 
 			const currentURL = window.location.href.replace(/\/$/, '');
@@ -220,11 +220,12 @@ export class FadeTransition extends Transition {
 				(currentPath === '' && (linkPath === '' || linkPath === '/'));
 
 			if (isCurrentPage) {
-				jQuery(this).addClass('elementor-item-active current-menu-item current_page_item');
-				jQuery(this).closest('li').addClass('current-menu-item current_page_item');
-				jQuery(this).off('click').on('click', (event) => {
+				a.classList.add('elementor-item-active', 'current-menu-item', 'current_page_item');
+				const parentLi = a.closest('li');
+				if (parentLi) parentLi.classList.add('current-menu-item', 'current_page_item');
+				a.addEventListener('click', (event) => {
 					event.preventDefault();
-				});
+				}, { once: true });
 			}
 		});
 

@@ -155,7 +155,7 @@ const taxi = new Core({
 		// Reload all other scripts inside the taxi view
 		return true;
 	},
-	links: 'a:not([target]):not([href^="\\#"]):not([data-taxi-ignore]):not([href^="#"])',
+	links: 'a:not([target]):not([href^="\\#"]):not([href^="#"]):not([data-taxi-ignore]):not([href*="/wp-admin"]):not([href*="/wp-login"]):not([href$=".pdf"]):not([href$=".zip"]):not([href$=".png"]):not([href$=".jpg"])',
 });
 
 window.taxi = taxi;

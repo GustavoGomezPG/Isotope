@@ -32,33 +32,26 @@ export const removeResizeObservers = () => {
 
 // Function to look for all the assets that will have parallax on the page
 export const parallax = (e) => {
-	const newParallaxItems = jQuery(e).find(".parallax");
-	// Check if the element exists
+	const newParallaxItems = e.querySelectorAll(".parallax");
 	if (!newParallaxItems.length) return;
-	// Loop through all the elements with the class parallax
-	newParallaxItems.each(function (index) {
-		// Get Direction attribute
-		const direction = jQuery(this).data("direction") || "vertical";
-		// Get the start and end attribute
-		const posStart = jQuery(this).data("start") || 0;
-		const posEnd = jQuery(this).data("end") || 300;
 
-		// Create a custom ID for the ScrollTrigger
+	newParallaxItems.forEach((item, index) => {
+		const direction = item.dataset.direction || "vertical";
+		const posStart = item.dataset.start || 0;
+		const posEnd = item.dataset.end || 300;
+
 		const id = `parallax-${index}-${Date.now()}`;
-
-		// add the ID's to an array to remove them later
 		window.parallaxIds.push(id);
 
-		// Create a ScrollTrigger for the element and set the speed
 		if (direction === "vertical") {
 			gsap.fromTo(
-				jQuery(this),
+				item,
 				{ y: `${posStart}px` },
 				{
 					y: `${posEnd}px`,
 					ease: "none",
 					scrollTrigger: {
-						trigger: this,
+						trigger: item,
 						id: id,
 						start: "top top",
 						end: "bottom top",
@@ -69,13 +62,13 @@ export const parallax = (e) => {
 			);
 		} else {
 			gsap.fromTo(
-				jQuery(this),
+				item,
 				{ x: `${posStart}px` },
 				{
 					x: `${posEnd}px`,
 					ease: "none",
 					scrollTrigger: {
-						trigger: this,
+						trigger: item,
 						start: "top bottom",
 						end: "bottom top",
 						scrub: true,
@@ -112,7 +105,7 @@ export const removeLevitate = () => {
 
 // Function to create a levitating effect on an item
 export const levitate = (e) => {
-	const elements = jQuery(e).find(".levitate");
+	const elements = e.querySelectorAll(".levitate");
 	if (!elements.length) return;
 
 	function random(min, max) {
@@ -198,25 +191,20 @@ export const removeFadeIn = () => {
 
 // Function to add a fade-in effect to an element
 export const fadeIn = (e) => {
-	const container = jQuery(e);
-
 	// Find all animation containers and animate their children with stagger
-	const animationContainers = container.find(".animation-container");
-	animationContainers.each(function (index) {
-		const fadeElements = jQuery(this).find(".fade-in");
+	const animationContainers = e.querySelectorAll(".animation-container");
+	animationContainers.forEach((container, index) => {
+		const fadeElements = container.querySelectorAll(".fade-in");
 		if (!fadeElements.length) return;
 
-		// Set initial state
 		gsap.set(fadeElements, { opacity: 0 });
 
-		// Create unique ID for this ScrollTrigger
 		const id = `fade-in-container-${index}-${Date.now()}`;
 		window.fadeInIds.push(id);
 
-		// Create ScrollTrigger for this container
 		ScrollTrigger.create({
 			id: id,
-			trigger: this,
+			trigger: container,
 			start: "top 85%",
 			once: true,
 			onEnter: () => {
@@ -231,26 +219,22 @@ export const fadeIn = (e) => {
 	});
 
 	// Find orphan .fade-in elements (not inside an animation-container)
-	const allFadeElements = container.find(".fade-in");
-	allFadeElements.each(function (index) {
-		// Skip if this element is inside an animation-container
-		if (jQuery(this).closest(".animation-container").length) return;
+	const allFadeElements = e.querySelectorAll(".fade-in");
+	allFadeElements.forEach((el, index) => {
+		if (el.closest(".animation-container")) return;
 
-		// Set initial state
-		gsap.set(this, { opacity: 0 });
+		gsap.set(el, { opacity: 0 });
 
-		// Create unique ID for this ScrollTrigger
 		const id = `fade-in-orphan-${index}-${Date.now()}`;
 		window.fadeInIds.push(id);
 
-		// Create individual ScrollTrigger for this orphan element
 		ScrollTrigger.create({
 			id: id,
-			trigger: this,
+			trigger: el,
 			start: "top 85%",
 			once: true,
 			onEnter: () => {
-				gsap.to(this, {
+				gsap.to(el, {
 					opacity: 1,
 					duration: 1,
 					ease: "power3.inOut",
@@ -276,33 +260,27 @@ export const removeBgTransition = () => {
 
 // Function to add background color transition on scroll
 export const bgTransition = (e) => {
-	const container = jQuery(e);
-	const bgElements = container.find(".bg-transition");
+	const bgElements = e.querySelectorAll(".bg-transition");
 	if (!bgElements.length) return;
 
-	bgElements.each(function (index) {
-		const el = jQuery(this);
+	bgElements.forEach((el, index) => {
+		const colorStart = el.dataset.colorStart || "#ffffff";
+		const colorEnd = el.dataset.colorEnd || "#000000";
+		const scrollStart = el.dataset.scrollStart || "top bottom";
+		const scrollEnd = el.dataset.scrollEnd || "bottom top";
 
-		// Get data attributes for colors and positions
-		const colorStart = el.data("color-start") || "#ffffff";
-		const colorEnd = el.data("color-end") || "#000000";
-		const scrollStart = el.data("scroll-start") || "top bottom";
-		const scrollEnd = el.data("scroll-end") || "bottom top";
-
-		// Create unique ID for this ScrollTrigger
 		const id = `bg-transition-${index}-${Date.now()}`;
 		window.bgTransitionIds.push(id);
 
-		// Create the background color transition animation
 		gsap.fromTo(
-			this,
+			el,
 			{ backgroundColor: colorStart },
 			{
 				backgroundColor: colorEnd,
 				ease: "none",
 				scrollTrigger: {
 					id: id,
-					trigger: this,
+					trigger: el,
 					start: scrollStart,
 					end: scrollEnd,
 					scrub: true,
@@ -312,257 +290,111 @@ export const bgTransition = (e) => {
 	});
 };
 
+// Helper to set overflow hidden on .line elements within a container
+const setLineOverflow = (container) => {
+	container.querySelectorAll(".line").forEach((line) => {
+		line.style.overflow = "hidden";
+	});
+};
+
+// Helper to create split-text animation with resize observer
+const createSplitAnimation = (el, textEl, splitted, id, animateOnce, setOverflow) => {
+	if (animateOnce) {
+		const animation = (s) => {
+			ScrollTrigger.create({
+				id: id,
+				trigger: el,
+				start: "top 85%",
+				once: true,
+				onEnter: () => {
+					gsap.to(s.words, {
+						y: "0%",
+						duration: 1,
+						ease: "power3.inOut",
+						stagger: 0.1,
+					});
+				},
+			});
+		};
+
+		const resizeObserver = new ResizeObserver(
+			debounce(() => {
+				splitted.split();
+				const trigger = ScrollTrigger.getById(id);
+				if (trigger) trigger.kill();
+				setOverflow();
+				gsap.set(splitted.words, { y: "100%" });
+				animation(splitted);
+				ScrollTrigger.refresh();
+			}, 300),
+		);
+
+		window.resizeObservers.push(resizeObserver);
+		resizeObserver.observe(document.body);
+		animation(splitted);
+	} else {
+		const animation = (s) => {
+			gsap.fromTo(
+				s.words,
+				{ y: "100%" },
+				{
+					y: "0%",
+					duration: 1,
+					ease: "power3.inOut",
+					id,
+					stagger: 0.1,
+					scrollTrigger: {
+						trigger: el,
+						scrub: true,
+						start: "top-=200% center",
+						end: "bottom+=200% center",
+					},
+				},
+			);
+		};
+
+		const resizeObserver = new ResizeObserver(
+			debounce(() => {
+				splitted.split();
+				const trigger = ScrollTrigger.getById(id);
+				if (trigger) trigger.kill();
+				setOverflow();
+				animation(splitted);
+				ScrollTrigger.refresh();
+			}, 300),
+		);
+
+		window.resizeObservers.push(resizeObserver);
+		resizeObserver.observe(document.body);
+		animation(splitted);
+	}
+};
+
 // Function to add splitType effect on text
 export const splitAnimate = (e) => {
-	const splitText = jQuery(e).find(".split-text");
-	if (!splitText.length) return;
+	const splitTextEls = e.querySelectorAll(".split-text");
+	if (!splitTextEls.length) return;
 
-	splitText.each(function () {
-		// Check if element has the "once" class for one-time animation
-		const animateOnce = jQuery(this).hasClass("once");
+	splitTextEls.forEach((el) => {
+		const animateOnce = el.classList.contains("once");
+		const textEl = el.querySelector(".elementor-heading-title");
+		if (!textEl) return;
 
-		// if the element has class split-text-words then animate the text into words
-		if (jQuery(this).hasClass("split-text-words")) {
-			// get the text element with class elementor-heading-title inside the element
-			const text = jQuery(this).find(".elementor-heading-title");
+		const id = `split-text-${Date.now()}`;
+		window.parallaxIds.push(id);
 
-			// create a scrollTrigger ID and add it to the  parallaxIds array
-			const id = `split-text-${Date.now()}`;
-			window.parallaxIds.push(id);
+		const splitted = new SplitType(textEl);
+		gsap.set(splitted.words, { y: "100%" });
 
-			// Split the text into words
-			const splitted = new SplitType(text);
-
-			// Add overflow hidden to the line container
-			text.find(".line").css("overflow", "hidden");
-
-			// Set initial state for words
-			gsap.set(splitted.words, { y: "100%" });
-
-			if (animateOnce) {
-				const animation = (splitted) => {
-					ScrollTrigger.create({
-						id: id,
-						trigger: this,
-						start: "top 85%",
-						once: true,
-						onEnter: () => {
-							gsap.to(splitted.words, {
-								y: "0%",
-								duration: 1,
-								ease: "power3.inOut",
-								stagger: 0.1,
-							});
-						},
-					});
-				};
-
-				const resizeObserver = new ResizeObserver(
-					debounce(() => {
-						splitted.split();
-						const trigger = ScrollTrigger.getById(id);
-						if (trigger) trigger.kill();
-						text.find(".line").css("overflow", "hidden");
-						gsap.set(splitted.words, { y: "100%" });
-						animation(splitted);
-						ScrollTrigger.refresh();
-					}, 300),
-				);
-
-				window.resizeObservers.push(resizeObserver);
-				resizeObserver.observe(document.body);
-				animation(splitted);
-			} else {
-				const animation = (splitted) => {
-					gsap.fromTo(
-						splitted.words,
-						{ y: "100%" },
-						{
-							y: "0%",
-							duration: 1,
-							ease: "power3.inOut",
-							id,
-							stagger: 0.1,
-							scrollTrigger: {
-								trigger: this,
-								scrub: true,
-								start: "top-=200% center",
-								end: "bottom+=200% center",
-							},
-						},
-					);
-				};
-
-				const resizeObserver = new ResizeObserver(
-					debounce(() => {
-						splitted.split();
-						ScrollTrigger.getById(id).kill();
-						text.find(".line").css("overflow", "hidden");
-						animation(splitted);
-						ScrollTrigger.refresh();
-					}, 300),
-				);
-
-				window.resizeObservers.push(resizeObserver);
-				resizeObserver.observe(document.body);
-				animation(splitted);
-			}
-		} else if (jQuery(this).hasClass("split-text-lines")) {
-			const text = jQuery(this).find(".elementor-heading-title");
-
-			const id = `split-text-${Date.now()}`;
-			window.parallaxIds.push(id);
-
-			const splitted = new SplitType(text);
-			text.css("overflow", "hidden");
-			gsap.set(splitted.words, { y: "100%" });
-
-			if (animateOnce) {
-				const animation = (splitted) => {
-					ScrollTrigger.create({
-						id: id,
-						trigger: this,
-						start: "top 85%",
-						once: true,
-						onEnter: () => {
-							gsap.to(splitted.words, {
-								y: "0%",
-								duration: 1,
-								ease: "power3.inOut",
-								stagger: 0.1,
-							});
-						},
-					});
-				};
-
-				const resizeObserver = new ResizeObserver(
-					debounce(() => {
-						splitted.split();
-						const trigger = ScrollTrigger.getById(id);
-						if (trigger) trigger.kill();
-						text.css("overflow", "hidden");
-						gsap.set(splitted.words, { y: "100%" });
-						animation(splitted);
-						ScrollTrigger.refresh();
-					}, 300),
-				);
-
-				window.resizeObservers.push(resizeObserver);
-				resizeObserver.observe(document.body);
-				animation(splitted);
-			} else {
-				const animation = (splitted) => {
-					gsap.fromTo(
-						splitted.words,
-						{ y: "100%" },
-						{
-							y: "0%",
-							duration: 1,
-							ease: "power3.inOut",
-							id,
-							stagger: 0.1,
-							scrollTrigger: {
-								trigger: this,
-								scrub: true,
-								start: "top-=200% center",
-								end: "bottom+=200% center",
-							},
-						},
-					);
-				};
-
-				const resizeObserver = new ResizeObserver(
-					debounce(() => {
-						splitted.split();
-						ScrollTrigger.getById(id).kill();
-						text.css("overflow", "hidden");
-						animation(splitted);
-						ScrollTrigger.refresh();
-					}, 300),
-				);
-
-				window.resizeObservers.push(resizeObserver);
-				resizeObserver.observe(document.body);
-				animation(splitted);
-			}
+		if (el.classList.contains("split-text-words")) {
+			setLineOverflow(textEl);
+			createSplitAnimation(el, textEl, splitted, id, animateOnce, () => setLineOverflow(textEl));
+		} else if (el.classList.contains("split-text-lines")) {
+			textEl.style.overflow = "hidden";
+			createSplitAnimation(el, textEl, splitted, id, animateOnce, () => { textEl.style.overflow = "hidden"; });
 		} else {
-			const text = jQuery(this).find(".elementor-heading-title");
-
-			const id = `split-text-${Date.now()}`;
-			window.parallaxIds.push(id);
-
-			const splitted = new SplitType(text);
-			text.find(".line").css("overflow", "hidden");
-			gsap.set(splitted.words, { y: "100%" });
-
-			if (animateOnce) {
-				const animation = (splitted) => {
-					ScrollTrigger.create({
-						id: id,
-						trigger: this,
-						start: "top 85%",
-						once: true,
-						onEnter: () => {
-							gsap.to(splitted.words, {
-								y: "0%",
-								duration: 1,
-								ease: "power3.inOut",
-								stagger: 0.1,
-							});
-						},
-					});
-				};
-
-				const resizeObserver = new ResizeObserver(
-					debounce(() => {
-						splitted.split();
-						const trigger = ScrollTrigger.getById(id);
-						if (trigger) trigger.kill();
-						text.find(".line").css("overflow", "hidden");
-						gsap.set(splitted.words, { y: "100%" });
-						animation(splitted);
-						ScrollTrigger.refresh();
-					}, 300),
-				);
-
-				window.resizeObservers.push(resizeObserver);
-				resizeObserver.observe(document.body);
-				animation(splitted);
-			} else {
-				const animation = (splitted) => {
-					gsap.fromTo(
-						splitted.words,
-						{ y: "100%" },
-						{
-							y: "0%",
-							duration: 1,
-							ease: "power3.inOut",
-							id,
-							stagger: 0.1,
-							scrollTrigger: {
-								trigger: this,
-								scrub: true,
-								start: "top-=200% center",
-								end: "bottom+=200% center",
-							},
-						},
-					);
-				};
-
-				const resizeObserver = new ResizeObserver(
-					debounce(() => {
-						splitted.split();
-						ScrollTrigger.getById(id).kill();
-						text.find(".line").css("overflow", "hidden");
-						animation(splitted);
-						ScrollTrigger.refresh();
-					}, 300),
-				);
-
-				window.resizeObservers.push(resizeObserver);
-				resizeObserver.observe(document.body);
-				animation(splitted);
-			}
+			setLineOverflow(textEl);
+			createSplitAnimation(el, textEl, splitted, id, animateOnce, () => setLineOverflow(textEl));
 		}
 	});
 };

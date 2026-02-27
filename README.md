@@ -32,14 +32,10 @@ git clone <repo-url> Isotope
 cd Isotope
 npm install
 
-# 3. Generate local SSL certs (required for Local by Flywheel / HTTPS sites)
-mkdir .cert
-mkcert -key-file .cert/key.pem -cert-file .cert/cert.pem localhost
-
-# 4. Start development
+# 3. Start development
 npm run dev
 
-# 5. Activate the theme in WP Admin → Appearance → Themes
+# 4. Activate the theme in WP Admin → Appearance → Themes
 ```
 
 ### Production Build
@@ -56,7 +52,7 @@ This generates a `dist/` folder with hashed assets and a manifest file. WordPres
 
 The theme auto-detects its environment:
 
-- **No `dist/` folder** → Development mode. Vite dev server at `https://localhost:3000` serves assets with HMR. Script tags are injected directly into `<head>`.
+- **No `dist/` folder** → Development mode. Vite dev server at `http://localhost:3000` serves assets with HMR. Script tags are injected directly into `<head>`.
 - **`dist/` folder exists** → Production mode. Assets are loaded from the manifest file with proper cache-busting hashes and `modulepreload` hints.
 
 This is handled by `ViteAssets.php` — a static class that every other loader depends on.
@@ -270,8 +266,8 @@ Isotope/
 ├── index.php                          # Main template router with Taxi container
 ├── screenshot.png                     # Theme thumbnail (1200x900)
 ├── package.json                       # npm dependencies and scripts
-├── vite.config.js                     # Vite build config (HTTPS, code splitting, manifest)
-├── .gitignore                         # Ignores node_modules, dist, .cert, .claude
+├── vite.config.js                     # Vite build config (code splitting, manifest)
+├── .gitignore                         # Ignores node_modules, dist, .claude
 │
 ├── includes/
 │   ├── ViteAssets.php                 # Dev/prod asset resolution (static class)
@@ -399,19 +395,17 @@ Vite automatically splits these into separate chunks for optimal loading:
 
 ## Gotchas
 
-1. **HTTPS required for dev:** The Vite dev server uses HTTPS (`https://localhost:3000`). Generate certs with `mkcert` and place them in `.cert/`. Without certs, Vite falls back to HTTP (may cause mixed content issues on HTTPS WordPress sites).
+1. **jQuery is available:** The theme loads jQuery (WordPress dependency). The animation system and Taxi.js transition code use jQuery for DOM queries. It's available globally.
 
-2. **jQuery is available:** The theme loads jQuery (WordPress dependency). The animation system and Taxi.js transition code use jQuery for DOM queries. It's available globally.
+2. **Header initial state:** The header starts hidden (`opacity: 0; transform: translateY(-100%)`) via CSS. The intro animation slides it in. If you remove the preloader/intro animation, also remove these CSS rules from `main.css`.
 
-3. **Header initial state:** The header starts hidden (`opacity: 0; transform: translateY(-100%)`) via CSS. The intro animation slides it in. If you remove the preloader/intro animation, also remove these CSS rules from `main.css`.
+3. **`#site-main-wrapper` starts invisible:** The main content wrapper has `opacity: 0` by default. The intro animation fades it in. Same note as above — remove the CSS if you remove the animation.
 
-4. **`#site-main-wrapper` starts invisible:** The main content wrapper has `opacity: 0` by default. The intro animation fades it in. Same note as above — remove the CSS if you remove the animation.
+4. **Session-based preloader:** The preloader only plays once per browser session (`sessionStorage`). Clear session storage or open a new tab to test it again.
 
-5. **Session-based preloader:** The preloader only plays once per browser session (`sessionStorage`). Clear session storage or open a new tab to test it again.
+5. **`data-taxi-ignore`:** Add this attribute to any link that should NOT use SPA navigation (e.g., download links, external links, admin links).
 
-6. **`data-taxi-ignore`:** Add this attribute to any link that should NOT use SPA navigation (e.g., download links, external links, admin links).
-
-7. **`data-lenis-prevent`:** Add this to containers that need native scroll behavior (e.g., modals, dropdowns with overflow).
+6. **`data-lenis-prevent`:** Add this to containers that need native scroll behavior (e.g., modals, dropdowns with overflow).
 
 ## License
 
